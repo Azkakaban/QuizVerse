@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import 'quiz_screen.dart';
+
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
 
@@ -29,9 +31,12 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Selamat datang, $name!'),
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => QuizScreen(
+          playerName: name,
+        ),
       ),
     );
   }
