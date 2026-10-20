@@ -4,7 +4,14 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'quiz_screen.dart';
 
 class WelcomeScreen extends StatefulWidget {
-  const WelcomeScreen({super.key});
+  final VoidCallback onThemeToggle;
+  final bool isDarkMode;
+
+  const WelcomeScreen({
+    super.key,
+    required this.onThemeToggle,
+    required this.isDarkMode,
+  });
 
   @override
   State<WelcomeScreen> createState() => _WelcomeScreenState();
@@ -36,6 +43,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       MaterialPageRoute(
         builder: (context) => QuizScreen(
           playerName: name,
+          onThemeToggle: widget.onThemeToggle,
+          isDarkMode: widget.isDarkMode,
         ),
       ),
     );
@@ -44,8 +53,22 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.sizeOf(context).width;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
+      appBar: AppBar(
+        actions: [
+          IconButton(
+            onPressed: widget.onThemeToggle,
+            tooltip: isDark ? 'Mode terang' : 'Mode gelap',
+            icon: Icon(
+              isDark
+                  ? Icons.light_mode_rounded
+                  : Icons.dark_mode_rounded,
+            ),
+          ),
+        ],
+      ),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -80,7 +103,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     'Uji pengetahuanmu dan lihat seberapa tinggi skor yang bisa kamu dapatkan!',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: Colors.grey.shade600,
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurfaceVariant,
                         ),
                   ),
                   const SizedBox(height: 36),

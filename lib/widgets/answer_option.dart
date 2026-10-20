@@ -14,7 +14,7 @@ class AnswerOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final primaryColor = Theme.of(context).colorScheme.primary;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return InkWell(
       onTap: onTap,
@@ -25,17 +25,20 @@ class AnswerOption extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? primaryColor : Colors.grey.shade300,
+            color: isSelected
+                ? colorScheme.primary
+                : colorScheme.outline,
             width: 2,
           ),
           color: isSelected
-              ? primaryColor.withValues(alpha: 0.1)
-              : Colors.white,
+              ? colorScheme.primaryContainer
+              : colorScheme.surfaceContainerHighest,
         ),
         child: Text(
           text,
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 fontWeight: FontWeight.w500,
+                color: colorScheme.onSurface,
               ),
         ),
       ),

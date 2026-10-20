@@ -6,10 +6,14 @@ import 'result_screen.dart';
 
 class QuizScreen extends StatefulWidget {
   final String playerName;
+  final VoidCallback onThemeToggle;
+  final bool isDarkMode;
 
   const QuizScreen({
     super.key,
     required this.playerName,
+    required this.onThemeToggle,
+    required this.isDarkMode,
   });
 
   @override
@@ -43,121 +47,171 @@ class _QuizScreenState extends State<QuizScreen> {
     final isLastQuestion =
         _currentQuestionIndex == quizQuestions.length - 1;
 
+    final isDark =
+        Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text('Quiz'),
+        actions: [
+          IconButton(
+            onPressed: widget.onThemeToggle,
+            tooltip: isDark ? 'Mode terang' : 'Mode gelap',
+            icon: Icon(
+              isDark
+                  ? Icons.light_mode_rounded
+                  : Icons.dark_mode_rounded,
+            ),
+          ),
+        ],
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Halo, ${widget.playerName}!',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: 700,
+                    minHeight: constraints.maxHeight,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Halo, ${widget.playerName}!',
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium,
+                      ),
 
-              const SizedBox(height: 20),
+                      const SizedBox(height: 20),
 
-              Text(
-                'Soal ${_currentQuestionIndex + 1} dari '
-                '${quizQuestions.length}',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-              ),
+                      Text(
+                        'Soal ${_currentQuestionIndex + 1} dari '
+                        '${quizQuestions.length}',
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                      ),
 
-              const SizedBox(height: 12),
+                      const SizedBox(height: 12),
 
-              LinearProgressIndicator(
-                value:
-                    (_currentQuestionIndex + 1) / quizQuestions.length,
-                minHeight: 8,
-                borderRadius: BorderRadius.circular(10),
-              ),
+                      LinearProgressIndicator(
+                        value:
+                            (_currentQuestionIndex + 1) /
+                                quizQuestions.length,
+                        minHeight: 8,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
 
-              const SizedBox(height: 32),
+                      const SizedBox(height: 32),
 
-              Text(
-                question.question,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
+                      Text(
+                        question.question,
+                        style: Theme.of(context)
+                            .textTheme
+                            .headlineSmall
+                            ?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
 
-              const SizedBox(height: 24),
+                      const SizedBox(height: 24),
 
-              Expanded(
-                child: ListView.builder(
-                  itemCount: question.options.length,
-                  itemBuilder: (context, index) {
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: AnswerOption(
-                        text: question.options[index],
-                        isSelected: selectedAnswerIndex == index,
-                        onTap: () {
-                          setState(() {
-                            _selectedAnswers[_currentQuestionIndex] =
-                                index;
-                          });
+                      ListView.builder(
+                        shrinkWrap: true,
+                        physics:
+                            const NeverScrollableScrollPhysics(),
+                        itemCount: question.options.length,
+                        itemBuilder: (context, index) {
+                          return Padding(
+                            padding:
+                                const EdgeInsets.only(bottom: 12),
+                            child: AnswerOption(
+                              text: question.options[index],
+                              isSelected:
+                                  selectedAnswerIndex == index,
+                              onTap: () {
+                                setState(() {
+                                  _selectedAnswers[
+                                      _currentQuestionIndex] = index;
+                                });
+                              },
+                            ),
+                          );
                         },
                       ),
-                    );
-                  },
+
+                      const SizedBox(height: 12),
+
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: isFirstQuestion
+                                  ? null
+                                  : () {
+                                      setState(() {
+                                        _currentQuestionIndex--;
+                                      });
+                                    },
+                              child: const Text('Previous'),
+                            ),
+                          ),
+
+                          const SizedBox(width: 12),
+
+                          Expanded(
+                            child: FilledButton(
+                              onPressed:
+                                  selectedAnswerIndex == null
+                                      ? null
+                                      : () {
+                                          if (!isLastQuestion) {
+                                            setState(() {
+                                              _currentQuestionIndex++;
+                                            });
+                                          } else {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    ResultScreen(
+                                                  playerName:
+                                                      widget.playerName,
+                                                  selectedAnswers:
+                                                      _selectedAnswers,
+                                                  onThemeToggle:
+                                                      widget
+                                                          .onThemeToggle,
+                                                  isDarkMode:
+                                                      isDark,
+                                                ),
+                                              ),
+                                            );
+                                          }
+                                        },
+                              child: Text(
+                                isLastQuestion
+                                    ? 'Selesai'
+                                    : 'Next',
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
-
-              const SizedBox(height: 12),
-
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: isFirstQuestion
-                          ? null
-                          : () {
-                              setState(() {
-                                _currentQuestionIndex--;
-                              });
-                            },
-                      child: const Text('Previous'),
-                    ),
-                  ),
-
-                  const SizedBox(width: 12),
-
-                  Expanded(
-                    child: FilledButton(
-                      onPressed: selectedAnswerIndex == null
-                          ? null
-                          : () {
-                              if (!isLastQuestion) {
-                                setState(() {
-                                  _currentQuestionIndex++;
-                                });
-                              } else {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => ResultScreen(
-                                      playerName: widget.playerName,
-                                      selectedAnswers: _selectedAnswers,
-                                    ),
-                                  ),
-                                );
-                              }
-                            },
-                      child: Text(
-                        isLastQuestion ? 'Selesai' : 'Next',
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );

@@ -1,22 +1,30 @@
 import 'package:flutter/material.dart';
 
 import '../data/quiz_questions.dart';
+import 'quiz_screen.dart';
+import 'review_screen.dart';
+import 'welcome_screen.dart';
 
 class ResultScreen extends StatelessWidget {
   final String playerName;
   final List<int?> selectedAnswers;
+  final VoidCallback onThemeToggle;
+  final bool isDarkMode;
 
   const ResultScreen({
     super.key,
     required this.playerName,
     required this.selectedAnswers,
+    required this.onThemeToggle,
+    required this.isDarkMode,
   });
 
   int _calculateScore() {
     int score = 0;
 
     for (int i = 0; i < quizQuestions.length; i++) {
-      if (selectedAnswers[i] == quizQuestions[i].correctAnswerIndex) {
+      if (selectedAnswers[i] ==
+          quizQuestions[i].correctAnswerIndex) {
         score++;
       }
     }
@@ -28,12 +36,27 @@ class ResultScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final score = _calculateScore();
     final totalQuestions = quizQuestions.length;
-    final percentage = (score / totalQuestions * 100).round();
+    final percentage =
+        (score / totalQuestions * 100).round();
+
+    final isDark =
+        Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Hasil Quiz'),
         automaticallyImplyLeading: false,
+        actions: [
+          IconButton(
+            onPressed: onThemeToggle,
+            tooltip: isDark ? 'Mode terang' : 'Mode gelap',
+            icon: Icon(
+              isDark
+                  ? Icons.light_mode_rounded
+                  : Icons.dark_mode_rounded,
+            ),
+          ),
+        ],
       ),
       body: SafeArea(
         child: Center(
@@ -49,7 +72,9 @@ class ResultScreen extends StatelessWidget {
                   Icon(
                     Icons.emoji_events_rounded,
                     size: 90,
-                    color: Theme.of(context).colorScheme.primary,
+                    color: Theme.of(context)
+                        .colorScheme
+                        .primary,
                   ),
 
                   const SizedBox(height: 24),
@@ -68,7 +93,9 @@ class ResultScreen extends StatelessWidget {
 
                   Text(
                     'Bagus, $playerName!',
-                    style: Theme.of(context).textTheme.titleLarge,
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleLarge,
                   ),
 
                   const SizedBox(height: 32),
@@ -122,12 +149,70 @@ class ResultScreen extends StatelessWidget {
                     width: double.infinity,
                     child: FilledButton(
                       onPressed: () {
-                        Navigator.popUntil(
+                        Navigator.push(
                           context,
-                          (route) => route.isFirst,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                ReviewScreen(
+                              selectedAnswers:
+                                  selectedAnswers,
+                              onThemeToggle:
+                                  onThemeToggle,
+                              isDarkMode: isDark,
+                            ),
+                          ),
                         );
                       },
-                      child: const Text('Kembali ke Beranda'),
+                      child: const Text(
+                        'Review Jawaban',
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton(
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                QuizScreen(
+                              playerName: playerName,
+                              onThemeToggle:
+                                  onThemeToggle,
+                              isDarkMode: isDark,
+                            ),
+                          ),
+                        );
+                      },
+                      child: const Text(
+                        'Ulangi Quiz',
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              WelcomeScreen(
+                            onThemeToggle:
+                                onThemeToggle,
+                            isDarkMode: isDark,
+                          ),
+                        ),
+                        (route) => false,
+                      );
+                    },
+                    child: const Text(
+                      'Kembali ke Beranda',
                     ),
                   ),
                 ],
